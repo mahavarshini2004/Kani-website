@@ -1,5 +1,5 @@
 import FloatingLearningElements from '../components/common/FloatingLearningElements.jsx'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 
 import {
@@ -17,6 +17,8 @@ import {
   Lightbulb,
   Sparkles,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -282,18 +284,14 @@ function CourseCard({ course, index, isDuplicate = false }) {
       )}
 
       <div className="relative z-10 mt-auto pt-7">
-        
-<Link
-  to="/free-demo"
-  style={{ color: '#ffffff' }}
-  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#12366b] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#1769aa] focus:outline-none focus:ring-2 focus:ring-[#1769aa] focus:ring-offset-2"
->
-  <span style={{ color: '#ffffff' }}>
-    Enquire About This Course
-  </span>
-  <ArrowRight size={17} color="#ffffff" />
-</Link>
-
+        <Link
+          to="/free-demo"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#12366b] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#1769aa] focus:outline-none focus:ring-2 focus:ring-[#1769aa] focus:ring-offset-2"
+          style={{ color: '#ffffff' }}
+        >
+          Enquire About This Course
+          <ArrowRight size={17} />
+        </Link>
       </div>
     </motion.article>
   )
@@ -405,26 +403,13 @@ function DemoSection() {
               })}
             </div>
 
-           
-
-<Link
-  to="/free-demo"
-  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#d8a52b] px-6 py-4 font-bold sm:w-auto"
-  style={{
-    color: '#ffffff',
-    backgroundColor: '#d8a52b',
-  }}
->
-  <span style={{ color: '#ffffff' }}>
-    Book a Free Demo
-  </span>
-  <ArrowRight
-    size={18}
-    style={{ color: '#ffffff', stroke: '#ffffff' }}
-  />
-</Link>
-
-
+            <Link
+              to="/free-demo"
+              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#d8a52b] px-6 py-4 font-bold text-[#12366b] transition hover:bg-amber-300 sm:w-auto"
+            >
+              Book a Free Demo
+              <ArrowRight size={18} />
+            </Link>
           </motion.div>
         </div>
       </div>
@@ -457,33 +442,14 @@ function WhyChooseKani() {
               develop the confidence to take your next step.
             </p>
 
-            
-<Link
-  to="/free-demo"
-  className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#12366b] px-6 py-3.5 font-bold transition hover:-translate-y-0.5 hover:bg-[#1769aa]"
-  style={{
-    color: '#ffffff',
-    WebkitTextFillColor: '#ffffff',
-  }}
->
-  <span
-    style={{
-      color: '#ffffff',
-      WebkitTextFillColor: '#ffffff',
-    }}
-  >
-    Start Your Learning Journey
-  </span>
-
-  <ArrowRight
-    size={18}
-    style={{
-      color: '#ffffff',
-      stroke: '#ffffff',
-    }}
-  />
-</Link>
-
+            <Link
+              to="/free-demo"
+              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#12366b] px-6 py-3.5 font-bold text-white transition hover:bg-[#1769aa]"
+              style={{ color: '#ffffff' }}
+            >
+              Start Your Learning Journey
+              <ArrowRight size={18} />
+            </Link>
           </motion.div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -514,39 +480,62 @@ function WhyChooseKani() {
 }
 
 export default function Courses() {
+  const courseTrackRef = useRef(null)
+  const [isCoursePaused, setIsCoursePaused] = useState(false)
+
+  const getCourseStep = () => {
+    const track = courseTrackRef.current
+    if (!track) return 0
+    const card = track.querySelector('.kani-course-card')
+    if (!card) return track.clientWidth
+    const styles = window.getComputedStyle(track)
+    const gap = parseFloat(styles.columnGap || styles.gap) || 0
+    return card.getBoundingClientRect().width + gap
+  }
+
+  const moveCourses = (direction) => {
+    const track = courseTrackRef.current
+    if (!track) return
+
+    const step = getCourseStep()
+    const atStart = track.scrollLeft <= 2
+    const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 3
+
+    if (direction < 0 && atStart) {
+      track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' })
+      return
+    }
+    if (direction > 0 && atEnd) {
+      track.scrollTo({ left: 0, behavior: 'smooth' })
+      return
+    }
+
+    track.scrollBy({ left: direction * step, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    if (isCoursePaused) return undefined
+
+    const intervalId = window.setInterval(() => {
+      const track = courseTrackRef.current
+      if (!track) return
+
+      const step = getCourseStep()
+      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8
+
+      if (atEnd) {
+        track.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        track.scrollBy({ left: step, behavior: 'smooth' })
+      }
+    }, 1500)
+
+    return () => window.clearInterval(intervalId)
+  }, [isCoursePaused])
+
   return (
     <main className="overflow-hidden bg-[#fffdf8]">
       <section className="relative isolate overflow-hidden px-5 pb-16 pt-20 sm:px-8 sm:pb-20 sm:pt-28 lg:pb-24">
-        <div
-  aria-hidden="true"
-  className="pointer-events-none absolute inset-0 -z-10"
-  style={{
-    backgroundColor: '#fffdf8',
-    backgroundImage: `
-      linear-gradient(
-        120deg,
-        rgba(23, 105, 170, 0.10) 0%,
-        rgba(255, 253, 248, 0.18) 35%,
-        rgba(24, 130, 59, 0.07) 70%,
-        rgba(216, 165, 43, 0.09) 100%
-      ),
-      repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        transparent 39px,
-        rgba(18, 54, 107, 0.055) 39px,
-        rgba(18, 54, 107, 0.055) 40px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 39px,
-        rgba(18, 54, 107, 0.055) 39px,
-        rgba(18, 54, 107, 0.055) 40px
-      )
-    `,
-  }}
-/>
         <FloatingLearningElements />
 
         <div className="pointer-events-none absolute inset-0 -z-10">
@@ -581,33 +570,14 @@ export default function Courses() {
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                
-<a
-  href="#free-demo"
-  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#12366b] px-6 py-4 font-bold text-white shadow-lg shadow-[#12366b]/15 transition hover:-translate-y-0.5 hover:bg-[#1769aa]"
-  style={{
-    color: '#ffffff',
-    WebkitTextFillColor: '#ffffff',
-  }}
->
-  <span
-    style={{
-      color: '#ffffff',
-      WebkitTextFillColor: '#ffffff',
-    }}
-  >
-    Book a Free Demo
-  </span>
-
-  <ArrowRight
-    size={18}
-    style={{
-      color: '#ffffff',
-      stroke: '#ffffff',
-    }}
-  />
-</a>
-
+                <a
+                  href="#free-demo"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#12366b] px-6 py-4 font-bold text-white shadow-lg shadow-[#12366b]/15 transition hover:-translate-y-0.5 hover:bg-[#1769aa]"
+                  style={{ color: '#ffffff' }}
+                >
+                  Book a Free Demo
+                  <ArrowRight size={18} />
+                </a>
 
                 <a
                   href="#course-list"
@@ -717,48 +687,79 @@ export default function Courses() {
             description="Explore our six course categories, from everyday communication to advanced academic and research support."
           />
 
-          <style>{`
-            @keyframes kani-course-marquee {
-              from { transform: translateX(0); }
-              to { transform: translateX(-50%); }
-            }
-            .kani-course-marquee-track {
-              animation: kani-course-marquee 48s linear infinite;
-              will-change: transform;
-            }
-            .kani-course-marquee:hover .kani-course-marquee-track,
-            .kani-course-marquee:focus-within .kani-course-marquee-track {
-              animation-play-state: paused;
-            }
-            @media (prefers-reduced-motion: reduce) {
-              .kani-course-marquee-track {
-                animation: none;
-                transform: none;
+          <div
+            className="relative"
+            onMouseEnter={() => setIsCoursePaused(true)}
+            onMouseLeave={() => setIsCoursePaused(false)}
+            onFocusCapture={() => setIsCoursePaused(true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setIsCoursePaused(false)
               }
-              .kani-course-marquee-duplicate {
-                display: none;
-              }
-            }
-          `}</style>
+            }}
+            onTouchStart={() => setIsCoursePaused(true)}
+            onTouchEnd={() => setIsCoursePaused(false)}
+          >
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <p className="text-sm text-[#66758a]">
+                Explore all six learning programmes
+              </p>
 
-          <div className="kani-course-marquee relative -mx-5 overflow-hidden px-5 pb-4 sm:-mx-8 sm:px-8" aria-label="Course catalogue">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-6 bg-gradient-to-r from-[#fffdf8] to-transparent sm:w-12" aria-hidden="true" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-6 bg-gradient-to-l from-[#fffdf8] to-transparent sm:w-12" aria-hidden="true" />
-            <div className="kani-course-marquee-track flex w-max">
-              <div className="flex items-stretch gap-5 pr-5 sm:gap-6 sm:pr-6">
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => moveCourses(-1)}
+                  aria-label="Previous courses"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#12366b]/20 bg-white text-[#12366b] shadow-sm transition hover:border-[#d8a52b] hover:bg-[#d8a52b] focus:outline-none focus:ring-2 focus:ring-[#1769aa] focus:ring-offset-2"
+                >
+                  <ChevronLeft size={21} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveCourses(1)}
+                  aria-label="Next courses"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#12366b]/20 bg-white text-[#12366b] shadow-sm transition hover:border-[#d8a52b] hover:bg-[#d8a52b] focus:outline-none focus:ring-2 focus:ring-[#1769aa] focus:ring-offset-2"
+                >
+                  <ChevronRight size={21} />
+                </button>
+              </div>
+            </div>
+
+            <div className="relative -mx-5 px-5 sm:-mx-8 sm:px-8">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 left-5 z-10 w-5 bg-gradient-to-r from-[#fffdf8] to-transparent sm:left-8 sm:w-10"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-5 z-10 w-5 bg-gradient-to-l from-[#fffdf8] to-transparent sm:right-8 sm:w-10"
+              />
+
+              <div
+                ref={courseTrackRef}
+                className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-6 sm:gap-6"
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+                aria-label="Course catalogue. Swipe, scroll, or use the previous and next buttons to explore courses."
+                tabIndex={0}
+              >
                 {courses.map((course, index) => (
-                  <div key={course.id} className="w-[min(82vw,350px)] shrink-0 sm:w-[350px]">
+                  <div
+                    key={course.id}
+                    className="kani-course-card w-[min(82vw,350px)] shrink-0 snap-start sm:w-[350px]"
+                  >
                     <CourseCard course={course} index={index} />
                   </div>
                 ))}
               </div>
-              <div className="kani-course-marquee-duplicate flex items-stretch gap-5 pr-5 sm:gap-6 sm:pr-6" aria-hidden="true" inert="">
-                {courses.map((course, index) => (
-                  <div key={`duplicate-${course.id}`} className="w-[min(82vw,350px)] shrink-0 sm:w-[350px]">
-                    <CourseCard course={course} index={index} isDuplicate />
-                  </div>
-                ))}
-              </div>
+            </div>
+
+            <div className="mt-2 flex items-center justify-center gap-2 text-xs text-[#66758a]">
+              <span className="h-2 w-2 rounded-full bg-[#18823b]" />
+              <span>Auto-sliding · Use arrows or swipe to explore</span>
             </div>
           </div>
 

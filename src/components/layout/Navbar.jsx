@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
-
 const LOGO = '/images/kani-logo.jpeg'
 const WHATSAPP_NUMBER = '919092410132'
 
@@ -44,11 +43,31 @@ function ActiveCapsule({ reduceMotion }) {
 export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
+  const previousLocation = useRef(`${location.pathname}${location.hash}`)
   const reduceMotion = useReducedMotion()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   // Do not show an active capsule on initial page load; show it after a nav selection.
   const [selectedNav, setSelectedNav] = useState(null)
+
+  // Synchronize the active gold capsule when navigation comes from the footer
+  // or browser Back/Forward controls. Keep it hidden on the initial page load.
+  useEffect(() => {
+    const nextLocation = `${location.pathname}${location.hash}`
+
+    if (previousLocation.current !== nextLocation) {
+      previousLocation.current = nextLocation
+
+      if (location.pathname === '/' && location.hash === '#testimonials') {
+        setSelectedNav('Testimonials')
+      } else {
+        const matchingItem = navItems.find(
+          (item) => item.type === 'route' && item.to === location.pathname,
+        )
+        setSelectedNav(matchingItem?.label ?? null)
+      }
+    }
+  }, [location.pathname, location.hash])
 
   useEffect(() => {
     setMobileOpen(false)
@@ -157,18 +176,25 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#e8e8df] bg-[#fffdf8]/95 shadow-sm backdrop-blur-md">
-      <nav aria-label="Main navigation" className="mx-auto flex min-h-[82px] max-w-[1600px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6 xl:px-8">
+      <style>{`
+        @media (min-width: 1024px) {
+          .kani-mobile-controls {
+            display: none !important;
+          }
+        }
+      `}</style>
+      <nav aria-label="Main navigation" className="mx-auto flex min-h-[94px] max-w-[1600px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6 xl:px-8">
         <Link
           to="/"
           aria-label="KANI English Research Academy home"
           className="flex shrink-0 items-center gap-2 sm:gap-2.5"
           onClick={() => { setActiveSection(''); setSelectedNav('Home'); setMobileOpen(false) }}
         >
-          <img src={LOGO} alt="KANI English Research Academy logo" className="h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14 lg:h-16 lg:w-16" />
-          <span className="flex min-w-0 flex-col leading-tight">
-            <span className="text-base font-extrabold tracking-wide text-[#17324f] sm:text-lg">KANI</span>
-            <span className="mt-1 whitespace-nowrap text-[7px] font-semibold uppercase tracking-tight text-[#28734a] sm:text-[9px]">English Research Academy</span>
-          </span>
+          <img
+            src={LOGO}
+            alt="KANI English Research Academy"
+            className="h-16 w-52 shrink-0 object-contain sm:h-[72px] sm:w-60 lg:h-[76px] lg:w-[270px]"
+          />
         </Link>
 
         {/* Desktop: navy pill with animated gold capsule and leaf accent */}
@@ -197,7 +223,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile controls */}
-        <div className="flex shrink-0 items-center gap-2 lg:hidden">
+        <div className="kani-mobile-controls flex shrink-0 items-center gap-2 lg:hidden">
           <Link to="/free-demo" onClick={() => setSelectedNav(null)} className="inline-flex min-h-10 items-center justify-center gap-1 rounded-full bg-[#12366b] px-3 text-xs font-bold text-white sm:px-4" style={{ color: '#ffffff' }}>
             <span style={{ color: '#ffffff' }}>Free Demo</span> <ArrowUpRight size={14} aria-hidden="true" style={{ color: '#ffffff', stroke: '#ffffff' }} />
           </Link>

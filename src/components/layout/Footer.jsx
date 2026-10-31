@@ -4,11 +4,11 @@ import {
   BookOpen,
   GraduationCap,
   Mail,
-  MapPin,
   MessageCircle,
   Phone,
   Sparkles,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const exploreLinks = [
   { label: 'Home', href: '/' },
@@ -19,20 +19,20 @@ const exploreLinks = [
 
 const learningLinks = [
   { label: 'Research Support', href: '/research-support' },
-  { label: 'Testimonials', href: '/testimonials' },
+  { label: 'Testimonials', href: '/#testimonials' },
   { label: 'Blog', href: '/blog' },
   { label: 'Contact Us', href: '/contact' },
 ]
 
 function FooterLink({ href, children }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className="group inline-flex w-fit items-center gap-2 text-sm text-white/70 transition-colors duration-200 hover:text-[#d8a52b]"
     >
       <span className="h-1.5 w-1.5 rounded-full bg-[#18823b] transition-colors group-hover:bg-[#d8a52b]" />
       {children}
-    </a>
+    </Link>
   )
 }
 
@@ -54,10 +54,11 @@ export default function Footer() {
       <div className="relative mx-auto max-w-7xl px-5 pb-6 pt-12 sm:px-8 sm:pt-16 lg:px-12">
         {/* Main footer grid */}
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.9fr_1.15fr] lg:gap-10">
+
           {/* Academy branding */}
           <div>
-            <a
-              href="/"
+            <Link
+              to="/"
               aria-label="KANI English Research Academy home"
               className="inline-flex items-center gap-3"
             >
@@ -75,7 +76,7 @@ export default function Footer() {
                   ENGLISH RESEARCH ACADEMY
                 </span>
               </span>
-            </a>
+            </Link>
 
             <p className="mt-5 max-w-sm text-sm leading-7 text-white/70">
               Speak English confidently. Communicate effectively. Grow
@@ -98,6 +99,7 @@ export default function Footer() {
             <h2 className="text-base font-bold text-white">
               Explore
             </h2>
+
             <div className="mt-5 flex flex-col items-start gap-3.5">
               {exploreLinks.map((link) => (
                 <FooterLink key={link.label} href={link.href}>
@@ -112,6 +114,7 @@ export default function Footer() {
             <h2 className="text-base font-bold text-white">
               Learning Support
             </h2>
+
             <div className="mt-5 flex flex-col items-start gap-3.5">
               {learningLinks.map((link) => (
                 <FooterLink key={link.label} href={link.href}>
@@ -120,13 +123,13 @@ export default function Footer() {
               ))}
             </div>
 
-            <a
-              href="/free-demo"
+            <Link
+              to="/free-demo"
               className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#d8a52b] transition hover:gap-3"
             >
               Free Demo
               <ArrowRight size={16} />
-            </a>
+            </Link>
           </div>
 
           {/* Contact information */}
@@ -195,13 +198,13 @@ export default function Footer() {
             </div>
           </div>
 
-          <a
-            href="/free-demo"
+          <Link
+            to="/free-demo"
             className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#d8a52b] px-5 py-3 text-sm font-bold text-[#12366b] transition duration-300 hover:-translate-y-0.5 hover:bg-[#f0c85c] sm:mt-0 sm:w-auto sm:shrink-0"
           >
             Book a Free Demo
             <ArrowRight size={17} />
-          </a>
+          </Link>
         </div>
 
         {/* Copyright */}
@@ -210,13 +213,13 @@ export default function Footer() {
             © {currentYear} KANI English Research Academy. All rights reserved.
           </p>
 
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center gap-2 transition hover:text-[#d8a52b]"
           >
             <BookOpen size={14} />
             Learn Globally. Grow Confidently.
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

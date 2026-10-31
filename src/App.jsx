@@ -11,7 +11,7 @@ import Blog from './pages/Blog.jsx'
 
 import Contact from "./pages/Contact";
 import Programme30Day from './pages/Programme30Day.jsx'
-
+import ScrollToTop from './components/common/ScrollToTop'
 
 
 import Navbar from './components/layout/Navbar.jsx'
@@ -21,6 +21,7 @@ import CustomCursor from './components/common/CustomCursor.jsx'
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <CustomCursor />
       <Navbar />
       <TaglineMarquee />
